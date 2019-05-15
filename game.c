@@ -157,7 +157,13 @@ int8_t move_base(int8_t direction) {
 	redraw_base(COLOUR_BLACK);
 	
 	// Move the base (only to the left at present)
-	basePosition--;
+	if(direction == MOVE_LEFT && basePosition != 0) {
+	    basePosition--; // basePostion = basePosition - 1	
+	}
+	else if(direction == MOVE_RIGHT && basePosition != 7) {
+	    basePosition++;
+	}
+	
 	
 	// Redraw the base
 	redraw_base(COLOUR_BASE);
