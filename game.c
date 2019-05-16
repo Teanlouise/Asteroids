@@ -227,6 +227,24 @@ void advance_projectiles(void) {
 			if (asteroidNumber != -1) {
 				remove_asteroid(asteroidNumber);
 				remove_projectile(projectileNumber);
+					// Now that the projectile and asteroid removed, generate
+					// a new random position for the asteroid.
+					// There are always 20 asteroids on the screen.  
+					do {
+						// Generate random x position - somewhere from 0
+						// to FIELD_WIDTH - 1
+						x = (uint8_t)(random() % FIELD_WIDTH);
+						// Generate random y position - somewhere from 3
+						// to FIELD_HEIGHT - 1 (i.e., not in the lowest
+						// three rows)
+						y = (uint8_t)(3 + (random() % (FIELD_HEIGHT-3)));
+					} while(asteroid_at(x,y) != -1);
+					// If we get here, we've now found an x,y location without
+					// an existing asteroid - record the position
+					asteroids[asteroidNumber] = GAME_POSITION(x,y);
+					numAsteroids++;
+					
+				redraw_asteroid(asteroidNumber, COLOUR_GREEN);
 			}
 			// OTHERWISE...
 			// No asteroid at current projectile location.
