@@ -151,8 +151,6 @@ int8_t move_base(int8_t direction) {
 	// basePosition 256 times will eventually bring it back to
 	// same value.
 	
-	// YOUR CODE HERE (AND BELOW) - FIX THIS FUNCTION
-	
 	// We erase the base from its current position first
 	redraw_base(COLOUR_BLACK);
 	
@@ -163,7 +161,6 @@ int8_t move_base(int8_t direction) {
 	else if(direction == MOVE_RIGHT && basePosition != 7) {
 	    basePosition++;
 	}
-	
 	
 	// Redraw the base
 	redraw_base(COLOUR_BASE);
@@ -196,7 +193,8 @@ int8_t fire_projectile(void) {
 void advance_projectiles(void) {
 	uint8_t x, y;
 	int8_t projectileNumber;
-
+	int8_t asteroidNumber;
+	
 	projectileNumber = 0;
 	while(projectileNumber < numProjectiles) {
 		// Get the current position of the projectile
@@ -225,23 +223,29 @@ void advance_projectiles(void) {
 			// CHECK HERE IF THE NEW PROJECTILE LOCATION CORRESPONDS TO
 			// AN ASTEROID LOCATION. IF IT DOES, REMOVE THE PROJECTILE
 			// AND THE ASTEROID.
-			
+			asteroidNumber = asteroid_at(x,y);
+			if (asteroidNumber != -1) {
+				remove_asteroid(asteroidNumber);
+				remove_projectile(projectileNumber);
+			}
 			// OTHERWISE...
+			// No asteroid at current projectile location.
+			else {
+				// Remove the projectile from the display 
+				redraw_projectile(projectileNumber, COLOUR_BLACK);
 			
-			// Remove the projectile from the display 
-			redraw_projectile(projectileNumber, COLOUR_BLACK);
+				// Update the projectile's position
+				projectiles[projectileNumber] = GAME_POSITION(x,y);
 			
-			// Update the projectile's position
-			projectiles[projectileNumber] = GAME_POSITION(x,y);
+				// Redraw the projectile
+				redraw_projectile(projectileNumber, COLOUR_PROJECTILE);
 			
-			// Redraw the projectile
-			redraw_projectile(projectileNumber, COLOUR_PROJECTILE);
-			
-			// Move on to the next projectile (we don't do this if a projectile
-			// is removed since projectiles will be shuffled in the list and the
-			// next projectile (if any) will take on the same projectile number)
-			projectileNumber++;
-		}			
+				// Move on to the next projectile (we don't do this if a projectile
+				// is removed since projectiles will be shuffled in the list and the
+				// next projectile (if any) will take on the same projectile number)
+				projectileNumber++;
+			}
+		}
 	}
 }
 
