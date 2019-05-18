@@ -94,9 +94,10 @@ void new_game(void) {
 	
 	// Clear the serial terminal
 	clear_terminal();
-	
+	move_cursor(10,10);
 	// Initialise the score
 	init_score();
+	printf_P(PSTR("Score:         0"));
 	
 	// Clear a button push or serial input if any are waiting
 	// (The cast to void means the return value is ignored.)
@@ -109,6 +110,7 @@ void play_game(void) {
 	int8_t button;
 	char serial_input, escape_sequence_char;
 	uint8_t characters_into_escape_sequence = 0;
+	uint32_t old_score = 0;
 	
 	// Get the current time and remember this as the last time the projectiles
     // were moved.
@@ -130,6 +132,16 @@ void play_game(void) {
 		escape_sequence_char = -1;
 		button = button_pushed();
 		
+		// Check if the score has changed. 
+		// Only update if the score has changed. Display new score.
+		if (get_score() != old_score) {
+			old_score = get_score();
+			clear_terminal();
+			move_cursor(10,10);
+			printf_P(PSTR("Score:%10u"), old_score);
+			
+		}
+				
 		if(button == NO_BUTTON_PUSHED) {
 			// No push button was pushed, see if there is any serial input
 			if(serial_input_available()) {

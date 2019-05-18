@@ -8,6 +8,7 @@
 #include "game.h"
 #include "ledmatrix.h"
 #include "pixel_colour.h"
+#include "score.h"
 #include <stdlib.h>
 /* Stdlib needed for random() - random number generator */
 
@@ -222,9 +223,10 @@ void advance_projectiles(void) {
 			// Projectile is not going off the top of the display
 			// CHECK HERE IF THE NEW PROJECTILE LOCATION CORRESPONDS TO
 			// AN ASTEROID LOCATION. IF IT DOES, REMOVE THE PROJECTILE
-			// AND THE ASTEROID.
+			// AND THE ASTEROID. Add 1 to the score
 			asteroidNumber = asteroid_at(x,y);
 			if (asteroidNumber != -1) {
+				add_to_score(1);
 				remove_asteroid(asteroidNumber);
 				remove_projectile(projectileNumber);
 					// Now that the projectile and asteroid removed, generate
