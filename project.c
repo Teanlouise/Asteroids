@@ -34,6 +34,9 @@ void handle_game_over(void);
 // ASCII code for Escape character
 #define ESCAPE_CHAR 27
 
+// List of SSD values from 0 to 9.
+uint8_t seven_seg[10] = {63, 6, 91,79, 102, 109, 125, 7, 127, 111};
+
 /////////////////////////////// main //////////////////////////////////
 int main(void) {
 	// Setup hardware and call backs. This will turn on 
@@ -92,13 +95,19 @@ void new_game(void) {
 	// Initialise the game and display
 	initialise_game();
 	
-	// Clear the serial terminal
+	// Clear the serial terminal and set score display parameters.
 	clear_terminal();
-	move_cursor(10,10);
-	// Initialise the score
+	move_cursor(10,10);	
+	// Initialise the score to 0.
 	init_score();
+	// Display starting score on terminal.
 	printf_P(PSTR("Score:         0"));
-	
+	// Display starting score on SSD on the right digit.
+	DDRA = 0xFF;
+	DDRC = 1;
+	PORTC = 0;
+	PORTA = seven_seg[0];
+		
 	// Clear a button push or serial input if any are waiting
 	// (The cast to void means the return value is ignored.)
 	(void)button_pushed();
@@ -139,7 +148,14 @@ void play_game(void) {
 			clear_terminal();
 			move_cursor(10,10);
 			printf_P(PSTR("Score:%10u"), old_score);
-			
+		}
+		
+		// Display score on SSD. Score displayed starting on the right.
+		PORTA = seven_seg[old_score % 10];
+		PORTC = 0;	
+		if (old_score > 9) {
+			PORTA = seven_seg[old_score / 10];
+			PORTC = 1;			
 		}
 				
 		if(button == NO_BUTTON_PUSHED) {
