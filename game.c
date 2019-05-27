@@ -239,7 +239,7 @@ void advance_projectiles(void) {
 						// Generate random y position - somewhere from 3
 						// to FIELD_HEIGHT - 1 (i.e., not in the lowest
 						// three rows)
-						y = (uint8_t)(3 + (random() % (FIELD_HEIGHT-3)));
+						y = FIELD_HEIGHT-1;
 					} while(asteroid_at(x,y) != -1);
 					// If we get here, we've now found an x,y location without
 					// an existing asteroid - record the position
@@ -266,6 +266,54 @@ void advance_projectiles(void) {
 				projectileNumber++;
 			}
 		}
+	}
+}
+
+void advance_asteroids(void) {
+	
+	uint8_t x, y;
+	int8_t asteroidNumber;
+	
+	asteroidNumber = 0;
+	while(asteroidNumber < numAsteroids) {
+		// Get the current position of the asteroid
+		x = GET_X_POSITION(asteroids[asteroidNumber]);
+		y = GET_Y_POSITION(asteroids[asteroidNumber]);
+		
+		// Check if current position is the bottom row of the field.
+		if(y == 0) {
+			// Yes - Move to top of field
+			// Remove the asteroid			
+			redraw_asteroid(asteroidNumber, COLOUR_BLACK);
+			// Now that the asteroid is removed, generate
+			// a new random x position for the asteroid in top column.
+			// There are always 20 asteroids on the screen.
+			do {
+				// Generate random x position - somewhere from 0
+				// to FIELD_WIDTH - 1
+				x = (uint8_t)(random() % FIELD_WIDTH);
+				// Generate y position always in top row (FIELDHEIGHT -1)
+				y = FIELD_HEIGHT-1;
+			} while(asteroid_at(x,y) != -1);
+			// If we get here, we've now found an x,y location without
+			// an existing asteroid - record the position
+			asteroids[asteroidNumber] = GAME_POSITION(x,y);
+			// Redraw asteroid in new random position
+			redraw_asteroid(asteroidNumber, COLOUR_GREEN);
+				
+		} else {
+			// Asteroid not in bottom row.	
+			// Move the asteroid down by 1 position/row.
+			y = y-1;
+			// Remove the asteroid from the display
+			redraw_asteroid(asteroidNumber, COLOUR_BLACK);
+			// Update the asteroid position
+			asteroids[asteroidNumber] = GAME_POSITION(x,y);
+			// Redraw the asteroid at the new position
+			redraw_asteroid(asteroidNumber, COLOUR_ASTEROID);			
+		}
+		// Check the next asteroid.
+		asteroidNumber++;
 	}
 }
 

@@ -216,6 +216,7 @@ void play_game(void) {
 			// the projectiles - move them - and keep track of the time we 
 			// moved them
 			advance_projectiles();
+			advance_asteroids();
 			
 			last_move_time = current_time;
 		}
