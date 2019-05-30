@@ -47,6 +47,10 @@ int8_t fire_projectile(void);
 // go off the top or that hit an asteroid are removed.
 void advance_projectiles(void);
 
+// Advance the asteroids on the field. Any asteroid that goes off the 
+// bottom will be regenerated randomly on the top row
+void advance_asteroids(void);
+
 // Returns 1 if the game is over, 0 otherwise
 int8_t is_game_over(void);
 

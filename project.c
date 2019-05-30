@@ -115,16 +115,23 @@ void new_game(void) {
 }
 
 void play_game(void) {
-	uint32_t current_time, last_move_time;
+	uint32_t current_time, last_move_time, last_asteroid_move;
+	uint32_t projectile_time_elapsed = 0, asteroid_time_elapsed = 0;
 	int8_t button;
 	char serial_input, escape_sequence_char;
 	uint8_t characters_into_escape_sequence = 0;
 	uint32_t old_score = 0;
+	char paused = 0;
+	
+	// Asteroid movement interval
+	uint32_t asteroid_time = 1800;
+	uint32_t ticks = 0;
 	
 	// Get the current time and remember this as the last time the projectiles
-    // were moved.
+	// and asteroids were moved.
 	current_time = get_current_time();
 	last_move_time = current_time;
+	last_asteroid_move = current_time;
 	
 	// We play the game until it's over
 	while(!is_game_over()) {
@@ -188,7 +195,26 @@ void play_game(void) {
 		}
 		
 		// Process the input. 
-		if(button==3 || escape_sequence_char=='D' || serial_input=='L' || serial_input=='l') {
+		if(serial_input == 'p' || serial_input == 'P') {
+			// Pause/unpause the game until 'p' or 'P' is pressed again.
+			paused = !paused;
+			if(paused) {
+				// Track the time elapsed for asteroid & projectiles between
+				// their last move and now.
+				projectile_time_elapsed = get_current_time() - last_move_time;
+				asteroid_time_elapsed = get_current_time() - last_asteroid_move;
+				continue;
+			} else {
+				// The game has unpaused. Set the asteroid & projectile's last
+				// move times to the current time less the time that had elapsed while
+				// paused. So their movement rate is unaffected.
+			    last_move_time = get_current_time() - projectile_time_elapsed;	
+				last_asteroid_move = get_current_time() - asteroid_time_elapsed;
+			}
+			
+		} else if (paused) {
+			continue;
+		} else if(button==3 || escape_sequence_char=='D' || serial_input=='L' || serial_input=='l') {
 			// Button 3 pressed OR left cursor key escape sequence completed OR
 			// letter L (lowercase or uppercase) pressed - attempt to move left
 			move_base(MOVE_LEFT);
@@ -203,9 +229,6 @@ void play_game(void) {
 			// Button 0 pressed OR right cursor key escape sequence completed OR
 			// letter R (lowercase or uppercase) pressed - attempt to move right
 			move_base(MOVE_RIGHT);
-		} else if(serial_input == 'p' || serial_input == 'P') {
-			// Unimplemented feature - pause/unpause the game until 'p' or 'P' is
-			// pressed again
 		} 
 		// else - invalid input or we're part way through an escape sequence -
 		// do nothing
@@ -216,10 +239,25 @@ void play_game(void) {
 			// the projectiles - move them - and keep track of the time we 
 			// moved them
 			advance_projectiles();
-			advance_asteroids();
 			
 			last_move_time = current_time;
 		}
+						
+		if(!is_game_over() && current_time >= last_asteroid_move + asteroid_time) {
+			// Interval has passed since the asteroids moved - move them - and 
+			// keep track of the time.
+			// Each asteroid movement is counted as ticks. Add one tick each time.
+			// Increase speed gradually after every 5 ticks. Max speed set to 600ms.
+			if( (ticks != 0) && (ticks % 5 == 0) && (asteroid_time >= 600) ){
+				asteroid_time = asteroid_time - 200;
+			}
+			advance_asteroids();			
+			
+			last_asteroid_move = current_time;
+			ticks = ticks + 1;
+		}
+		
+		
 	}
 	// We get here if the game is over.
 }
